@@ -15,7 +15,7 @@ export ARGOS_DEBUG="0"
 export ARGOS_PACKAGE_INDEX="https://raw.githubusercontent.com/argosopentech/argospm-index/main/"
 export ARGOS_PACKAGES_DIR="/home/<username>/.local/share/argos-translate/packages/"
 export ARGOS_DEVICE_TYPE="cpu"
-export ARGOS_MAX_LOADED_MODELS="8"
+export ARGOS_MAX_LOADED_MODELS="0"
 
 ```
 
@@ -28,7 +28,7 @@ export ARGOS_MAX_LOADED_MODELS="8"
     "ARGOS_PACKAGES_INDEX": "https://raw.githubusercontent.com/argosopentech/argospm-index/main/",
     "ARGOS_PACKAGE_DIR": "/home/<username>/.local/share/argos-translate/packages/",
     "ARGOS_DEVICE_TYPE": "cpu",
-    "ARGOS_MAX_LOADED_MODELS": "8"
+    "ARGOS_MAX_LOADED_MODELS": "0"
 }
 ```
 """
@@ -175,8 +175,9 @@ batch_size = int(get_setting("ARGOS_BATCH_SIZE", "32"))
 compute_type = get_setting("ARGOS_COMPUTE_TYPE", "auto")
 beam_size = int(get_setting("ARGOS_BEAM_SIZE", "4"))
 
-# Cap ctranslate2.Translator objects preventing uncontrollable memory usage growth.
-max_loaded_models = int(get_setting("ARGOS_MAX_LOADED_MODELS", "8"))
+# Max limit for ctranslate2.Translator objects (LRU eviction). 0 = unlimited.
+# This setting puts a limit on memory usage.
+max_loaded_models = int(get_setting("ARGOS_MAX_LOADED_MODELS", "0"))
 
 
 class ModelProvider(Enum):

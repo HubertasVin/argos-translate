@@ -29,7 +29,9 @@ def _malloc_trim():
 
 
 def _evict_locked_translators():
-    """Drop unused translators over the cap."""
+    """Drop least recently used translators over the cap."""
+    if settings.max_loaded_models <= 0:
+        return
     evicted = False
     while len(_loaded_translators) > settings.max_loaded_models:
         _, model = _loaded_translators.popitem(last=False)  # least recently used
@@ -227,9 +229,10 @@ class PackageTranslation(ITranslation):
                     params["compute_type"] = settings.compute_type
                 self.translator = ctranslate2.Translator(**params)
             translator = self.translator
-            _loaded_translators[id(self)] = self
-            _loaded_translators.move_to_end(id(self))
-            _evict_locked_translators()
+            if settings.max_loaded_models > 0:
+                _loaded_translators[id(self)] = self
+                _loaded_translators.move_to_end(id(self))
+                _evict_locked_translators()
         return self._hypotheses_uncapped(input_text, num_hypotheses, translator)
 
     def _hypotheses_uncapped(
