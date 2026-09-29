@@ -233,7 +233,10 @@ class PackageTranslation(ITranslation):
                 _loaded_translators[id(self)] = self
                 _loaded_translators.move_to_end(id(self))
                 _evict_locked_translators()
-        return self._hypotheses_uncapped(input_text, num_hypotheses, translator)
+            # Translation itself stays under the lock: concurrent ct2
+            # calls make the ROCm pinned-host staging pool double
+            # per thread and never shrink (measured 2x retention).
+            return self._hypotheses_uncapped(input_text, num_hypotheses, translator)
 
     def _hypotheses_uncapped(
         self, input_text: str, num_hypotheses: int, translator: Translator
