@@ -36,6 +36,13 @@ def _evict_locked_translators():
     while len(_loaded_translators) > settings.max_loaded_models:
         _, model = _loaded_translators.popitem(last=False)  # least recently used
         model.translator = None
+        # MiniSBDSentencizer.detector holds an onnxruntime session
+        # (~50-64MB); with 80 pairs used once each that is 4-5GB of
+        # sessions kept alive by the global Package objects. Drop it
+        # with the translator; lazy_detector() rebuilds on next use.
+        sentencizer = getattr(model.sentencizer, "detector", None)
+        if sentencizer is not None:
+            model.sentencizer.detector = None
         evicted = True
     if evicted:
         _malloc_trim()
