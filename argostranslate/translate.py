@@ -36,10 +36,6 @@ def _evict_locked_translators():
     while len(_loaded_translators) > settings.max_loaded_models:
         _, model = _loaded_translators.popitem(last=False)  # least recently used
         model.translator = None
-        # MiniSBDSentencizer.detector holds an onnxruntime session
-        # (~50-64MB); with 80 pairs used once each that is 4-5GB of
-        # sessions kept alive by the global Package objects. Drop it
-        # with the translator; lazy_detector() rebuilds on next use.
         sentencizer = getattr(model.sentencizer, "detector", None)
         if sentencizer is not None:
             model.sentencizer.detector = None
@@ -240,9 +236,6 @@ class PackageTranslation(ITranslation):
                 _loaded_translators[id(self)] = self
                 _loaded_translators.move_to_end(id(self))
                 _evict_locked_translators()
-            # Translation itself stays under the lock: concurrent ct2
-            # calls make the ROCm pinned-host staging pool double
-            # per thread and never shrink (measured 2x retention).
             return self._hypotheses_uncapped(input_text, num_hypotheses, translator)
 
     def _hypotheses_uncapped(
