@@ -23,24 +23,6 @@ from argostranslate.utils import info, warning
 
 minisbd_models.cache_dir = str(settings.data_dir / "minisbd")
 
-# One MiniSBDSentencizer (and thus one onnxruntime session) exists per
-# PackageTranslation and lives for the process lifetime. ORT's default
-# CPU memory arena reserves ~64MB per session and never returns it, so
-# every distinct language pair used adds ~64MB of resident memory. The
-# SBD model is ~0.2MB, so the arena is pure overhead: disable it.
-import onnxruntime as _ort
-
-_orig_session_options = _ort.SessionOptions
-
-
-def _session_options_without_arena():
-    options = _orig_session_options()
-    options.enable_cpu_mem_arena = False
-    return options
-
-
-_ort.SessionOptions = _session_options_without_arena
-
 def get_stanza_processors(lang_code: str, resources: dict) -> str:
     """Get appropriate processors for a language, including MWT if available."""
     try:

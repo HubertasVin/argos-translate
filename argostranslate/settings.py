@@ -177,7 +177,7 @@ beam_size = int(get_setting("ARGOS_BEAM_SIZE", "4"))
 
 # Max limit for ctranslate2.Translator objects (LRU eviction). 0 = unlimited.
 # This setting puts a limit on memory usage.
-# Setting this could reduce performance by 30% or more.
+# Changing this could reduce performance by 30% or more, depending on the value entered.
 max_loaded_models = int(get_setting("ARGOS_MAX_LOADED_MODELS", "0"))
 
 
